@@ -2,10 +2,11 @@
 // Build configuration for local/unsigned builds (no Apple Developer certificate required).
 // Used by `make local` — does NOT affect Debug or Release configurations.
 
-// Ad-hoc signing (works without a developer account)
-CODE_SIGN_IDENTITY = -
+// Apple Development cert (cert-based DR keeps TCC perms stable across rebuilds).
+// Team ID is the cert's OU (EVBK3FN863), not the (87R47LZ5EP) shown in the CN.
+CODE_SIGN_IDENTITY = Apple Development: ANDREY SHRAYEV (87R47LZ5EP)
 CODE_SIGN_STYLE = Manual
-DEVELOPMENT_TEAM =
+DEVELOPMENT_TEAM = EVBK3FN863
 PROVISIONING_PROFILE_SPECIFIER =
 
 // Entitlements are set via absolute path in the Makefile command line
@@ -13,3 +14,7 @@ PROVISIONING_PROFILE_SPECIFIER =
 
 // Add LOCAL_BUILD compilation flag so Swift code can use #if LOCAL_BUILD
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) LOCAL_BUILD
+
+// Append fork build-metadata suffix to upstream version (e.g. 1.78 -> 1.78+ads)
+// Uses '+' (semver build metadata) not '-' so it's not treated as a pre-release.
+MARKETING_VERSION = $(inherited)+ads

@@ -44,37 +44,39 @@ setup: whisper
 build: setup
 	xcodebuild -project VoiceInk.xcodeproj -scheme VoiceInk -configuration Debug CODE_SIGN_IDENTITY="" build
 
-# Build for local use without Apple Developer certificate
+# Build LOCAL_BUILD with Apple Dev cert, deploy to /Applications, lock against Sparkle
 local: check setup
-	@echo "Building VoiceInk for local use (no Apple Developer certificate required)..."
+	@echo "Building VoiceInk (LOCAL_BUILD, Apple Dev cert signing)..."
 	@rm -rf "$(LOCAL_DERIVED_DATA)"
 	xcodebuild -project VoiceInk.xcodeproj -scheme VoiceInk -configuration Debug \
 		-derivedDataPath "$(LOCAL_DERIVED_DATA)" \
 		-xcconfig LocalBuild.xcconfig \
-		CODE_SIGN_IDENTITY="-" \
-		CODE_SIGNING_REQUIRED=NO \
+		CODE_SIGN_IDENTITY="Apple Development: ANDREY SHRAYEV (87R47LZ5EP)" \
+		CODE_SIGNING_REQUIRED=YES \
 		CODE_SIGNING_ALLOWED=YES \
-		DEVELOPMENT_TEAM="" \
+		CODE_SIGN_STYLE=Manual \
+		DEVELOPMENT_TEAM=EVBK3FN863 \
 		CODE_SIGN_ENTITLEMENTS="$(CURDIR)/VoiceInk/VoiceInk.local.entitlements" \
 		SWIFT_ACTIVE_COMPILATION_CONDITIONS='$$(inherited) LOCAL_BUILD' \
 		build
-	@APP_PATH="$(LOCAL_DERIVED_DATA)/Build/Products/Debug/VoiceInk.app" && \
-	if [ -d "$$APP_PATH" ]; then \
-		echo "Copying VoiceInk.app to ~/Downloads..."; \
-		rm -rf "$$HOME/Downloads/VoiceInk.app"; \
-		ditto "$$APP_PATH" "$$HOME/Downloads/VoiceInk.app"; \
-		xattr -cr "$$HOME/Downloads/VoiceInk.app"; \
-		echo ""; \
-		echo "Build complete! App saved to: ~/Downloads/VoiceInk.app"; \
-		echo "Run with: open ~/Downloads/VoiceInk.app"; \
-		echo ""; \
-		echo "Limitations of local builds:"; \
-		echo "  - No iCloud dictionary sync"; \
-		echo "  - No automatic updates (pull new code and rebuild to update)"; \
-	else \
-		echo "Error: Could not find built VoiceInk.app at $$APP_PATH"; \
-		exit 1; \
-	fi
+	@APP_PATH="$(LOCAL_DERIVED_DATA)/Build/Products/Debug/VoiceInk.app"; \
+	DEST="/Applications/VoiceInk.app"; \
+	if [ ! -d "$$APP_PATH" ]; then echo "Build artifact missing at $$APP_PATH"; exit 1; fi; \
+	echo "Killing running instance (if any)..."; \
+	pkill -f "$$DEST/Contents/MacOS/VoiceInk" 2>/dev/null || true; \
+	sleep 1; \
+	if [ -d "$$DEST" ]; then chflags -R nouchg "$$DEST" 2>/dev/null || true; rm -rf "$$DEST"; fi; \
+	echo "Installing to $$DEST..."; \
+	ditto "$$APP_PATH" "$$DEST"; \
+	xattr -cr "$$DEST"; \
+	echo "Verifying signature..."; \
+	codesign --verify --strict "$$DEST" || { echo "SIGNATURE VERIFY FAILED"; exit 1; }; \
+	/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f "$$DEST"; \
+	echo "Locking bundle (chflags uchg) to block Sparkle replacement..."; \
+	chflags -R uchg "$$DEST"; \
+	echo ""; \
+	echo "Deployed: $$DEST"; \
+	echo "Launch:   open $$DEST"
 
 # Run application
 run:

@@ -62,7 +62,11 @@ struct ContentView: View {
     @EnvironmentObject private var transcriptionModelManager: TranscriptionModelManager
     @EnvironmentObject private var recordingShortcutManager: RecordingShortcutManager
     @AppStorage("powerModeUIFlag") private var powerModeUIFlag = false
+    #if LOCAL_BUILD
+    @State private var selectedView: ViewType? = .history
+    #else
     @State private var selectedView: ViewType? = .metrics
+    #endif
     let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0"
     @StateObject private var licenseViewModel = LicenseViewModel()
 
@@ -71,6 +75,11 @@ struct ContentView: View {
             if viewType == .powerMode {
                 return powerModeUIFlag
             }
+            #if LOCAL_BUILD
+            if viewType == .license {
+                return false
+            }
+            #endif
             return true
         }
     }
@@ -92,6 +101,7 @@ struct ContentView: View {
                         Text("VoiceInk")
                             .font(.system(size: 14, weight: .semibold))
 
+                        #if !LOCAL_BUILD
                         if case .licensed = licenseViewModel.licenseState {
                             Text("PRO")
                                 .font(.system(size: 9, weight: .heavy))
@@ -101,6 +111,7 @@ struct ContentView: View {
                                 .background(Color.blue)
                                 .cornerRadius(4)
                         }
+                        #endif
 
                         Spacer()
                     }

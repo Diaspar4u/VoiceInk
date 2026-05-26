@@ -106,10 +106,12 @@ struct MetricsContent: View {
 
                             heroSection
                             metricsSection
+                            #if !LOCAL_BUILD
                             HStack(alignment: .top, spacing: 18) {
                                 HelpAndResourcesSection()
                                 DashboardPromotionsSection(licenseState: licenseState)
                             }
+                            #endif
 
                             Spacer(minLength: 20)
 
