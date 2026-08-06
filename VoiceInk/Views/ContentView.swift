@@ -20,7 +20,12 @@ final class MainWindowNavigation: ObservableObject {
 
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "MenuBarWindowFlow")
 
-    @Published var selectedView: ViewType = .dashboard
+    #if LOCAL_BUILD
+        // LOCAL_BUILD_DEFAULT_HISTORY
+        @Published var selectedView: ViewType = .history
+    #else
+        @Published var selectedView: ViewType = .dashboard
+    #endif
 
     private init() {}
 

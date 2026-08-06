@@ -332,12 +332,21 @@ final class OnboardingFlowController {
         isTranscriptionSetupReady: Bool,
         onComplete: () -> Void
     ) {
+        #if LOCAL_BUILD
+            guard
+                coordinator.stage == .trust || coordinator.stage == .license
+                    || coordinator.isCurrentExperienceReady(isTranscriptionSetupReady: isTranscriptionSetupReady)
+            else {
+                return
+            }
+        #else
         guard
             coordinator.stage == .license
                 || coordinator.isCurrentExperienceReady(isTranscriptionSetupReady: isTranscriptionSetupReady)
         else {
             return
         }
+        #endif
 
         OnboardingStorageKeys.onboardingKeys.forEach {
             coordinator.defaults.removeObject(forKey: $0)

@@ -471,6 +471,10 @@ class UpdaterViewModel: ObservableObject {
     @Published var automaticallyChecksForUpdates = false
 
     init() {
+        #if LOCAL_BUILD
+            updaterController = SPUStandardUpdaterController(
+                startingUpdater: false, updaterDelegate: nil, userDriverDelegate: nil)
+        #else
         updaterController = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: nil, userDriverDelegate: nil)
 
@@ -481,15 +485,19 @@ class UpdaterViewModel: ObservableObject {
 
         updaterController.updater.publisher(for: \.automaticallyChecksForUpdates)
             .assign(to: &$automaticallyChecksForUpdates)
+        #endif
     }
 
     func setAutomaticallyChecksForUpdates(_ value: Bool) {
-        updaterController.updater.automaticallyChecksForUpdates = value
+        #if !LOCAL_BUILD
+            updaterController.updater.automaticallyChecksForUpdates = value
+        #endif
     }
 
     func checkForUpdates() {
-        // This is for manual checks - will show UI
-        updaterController.checkForUpdates(nil)
+        #if !LOCAL_BUILD
+            updaterController.checkForUpdates(nil)
+        #endif
     }
 }
 
@@ -497,8 +505,12 @@ struct CheckForUpdatesView: View {
     @ObservedObject var updaterViewModel: UpdaterViewModel
 
     var body: some View {
+        #if LOCAL_BUILD
+            EmptyView()
+        #else
         Button("Check for Updates…", action: updaterViewModel.checkForUpdates)
             .disabled(!updaterViewModel.canCheckForUpdates)
+        #endif
     }
 }
 

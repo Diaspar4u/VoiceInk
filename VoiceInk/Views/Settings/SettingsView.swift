@@ -238,12 +238,15 @@ struct SettingsView: View {
 
                 LaunchAtLogin.Toggle(String(localized: "Launch at Login"))
 
-                Toggle(
-                    "Auto-check Updates",
-                    isOn: Binding(
-                        get: { updaterViewModel.automaticallyChecksForUpdates },
-                        set: { updaterViewModel.setAutomaticallyChecksForUpdates($0) }
-                    ))
+                #if !LOCAL_BUILD
+                    // LOCAL_BUILD_HIDE_SETTINGS_UPDATER
+                    Toggle(
+                        "Auto-check Updates",
+                        isOn: Binding(
+                            get: { updaterViewModel.automaticallyChecksForUpdates },
+                            set: { updaterViewModel.setAutomaticallyChecksForUpdates($0) }
+                        ))
+                #endif
 
                 Toggle("Show Announcements", isOn: $enableAnnouncements)
                     .onChange(of: enableAnnouncements) { _, newValue in
@@ -255,10 +258,12 @@ struct SettingsView: View {
                     }
 
                 HStack {
+                    #if !LOCAL_BUILD
                     Button("Check for Updates") {
                         updaterViewModel.checkForUpdates()
                     }
                     .disabled(!updaterViewModel.canCheckForUpdates)
+                    #endif
 
                     Button("Reset Onboarding") {
                         showResetOnboardingAlert = true
