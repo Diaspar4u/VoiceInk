@@ -35,7 +35,11 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
         checksForUpdatesWhenDashboardAppears = Self.initialAutomaticCheckPreference(in: defaults)
         super.init()
 
-        let updater = updaterController.updater
+        #if LOCAL_BUILD
+            checksForUpdatesWhenDashboardAppears = false
+            return
+        #else
+            let updater = updaterController.updater
 
         // VoiceInk owns automatic discovery through Sparkle's non-presenting probe.
         // Keeping Sparkle's scheduler disabled prevents it from showing an update
@@ -44,11 +48,15 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
         updaterController.startUpdater()
 
         canCheckForUpdates = updater.canCheckForUpdates
-        updater.publisher(for: \.canCheckForUpdates)
-            .assign(to: &$canCheckForUpdates)
+            updater.publisher(for: \.canCheckForUpdates)
+                .assign(to: &$canCheckForUpdates)
+        #endif
     }
 
     func setChecksForUpdatesWhenDashboardAppears(_ value: Bool) {
+        #if LOCAL_BUILD
+            return
+        #else
         guard checksForUpdatesWhenDashboardAppears != value else { return }
 
         checksForUpdatesWhenDashboardAppears = value
@@ -59,9 +67,13 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
         } else {
             availableUpdate = nil
         }
+        #endif
     }
 
     func checkForUpdatesIfDue() {
+        #if LOCAL_BUILD
+            return
+        #else
         guard checksForUpdatesWhenDashboardAppears else { return }
 
         let updater = updaterController.updater
@@ -73,9 +85,13 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
         }
 
         checkForUpdateInformationIfPossible()
+        #endif
     }
 
     func checkForUpdates() {
+        #if LOCAL_BUILD
+            return
+        #else
         guard canCheckForUpdates else { return }
 
         // Any explicit check is interaction with the currently advertised update.
@@ -90,6 +106,7 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
             isUserInitiatedUpdateCheck = true
         }
         updaterController.checkForUpdates(nil)
+        #endif
     }
 
     func updater(_ updater: SPUUpdater, didFindValidUpdate item: SUAppcastItem) {
@@ -156,7 +173,11 @@ struct CheckForUpdatesView: View {
     @ObservedObject var updaterViewModel: UpdaterViewModel
 
     var body: some View {
-        Button("Check for Updates…", action: updaterViewModel.checkForUpdates)
-            .disabled(!updaterViewModel.canCheckForUpdates)
+        #if LOCAL_BUILD
+            EmptyView()
+        #else
+            Button("Check for Updates…", action: updaterViewModel.checkForUpdates)
+                .disabled(!updaterViewModel.canCheckForUpdates)
+        #endif
     }
 }

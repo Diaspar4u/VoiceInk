@@ -451,6 +451,9 @@ final class LicenseViewModel: ObservableObject {
     }
 
     private func resolvedState(at date: Date) -> LicenseState {
+        #if LOCAL_BUILD
+            return .licensed
+        #else
         if storedLicenseKey != nil,
             activationId != nil || !requiresActivation
         {
@@ -469,6 +472,7 @@ final class LicenseViewModel: ObservableObject {
         }
 
         return .trial(daysRemaining: min(trialPeriodDays, trialPeriodDays - daysSinceTrialStart))
+        #endif
     }
 
     private func scheduleStorageRetryIfNeeded() {

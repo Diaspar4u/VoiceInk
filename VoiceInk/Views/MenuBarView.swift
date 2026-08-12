@@ -155,10 +155,13 @@ struct MenuBarView: View {
             }
             .keyboardShortcut(",", modifiers: .command)
 
-            Button("Check for Updates") {
-                updaterViewModel.checkForUpdates()
-            }
-            .disabled(!updaterViewModel.canCheckForUpdates)
+            #if !LOCAL_BUILD
+                // LOCAL_BUILD_HIDE_MENU_UPDATER
+                Button("Check for Updates") {
+                    updaterViewModel.checkForUpdates()
+                }
+                .disabled(!updaterViewModel.canCheckForUpdates)
+            #endif
 
             Button("Quit VoiceInk") {
                 NSApplication.shared.terminate(nil)
