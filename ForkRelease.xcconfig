@@ -1,0 +1,19 @@
+// ForkRelease.xcconfig
+// Maintained +ads build: preserves local-fork behavior and always enables our Sparkle channel.
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) LOCAL_BUILD
+
+MARKETING_VERSION = 2.11+ads
+CURRENT_PROJECT_VERSION = 213
+
+DEVELOPMENT_TEAM = EVBK3FN863
+CODE_SIGN_STYLE = Manual
+CODE_SIGN_IDENTITY = Apple Development: ANDREY SHRAYEV (87R47LZ5EP)
+PROVISIONING_PROFILE_SPECIFIER =
+
+// Only the VoiceInk app target consumes this variable. Nested frameworks/XPC services
+// keep their own signing metadata during Xcode Archive + Developer ID export.
+VOICEINK_ENTITLEMENTS = $(SRCROOT)/VoiceInk/VoiceInk.local.entitlements
+
+VOICEINK_FEED_URL = https:/$()/raw.githubusercontent.com/Diaspar4u/VoiceInk/andrey/all-fixes/appcast.xml
+VOICEINK_SPARKLE_PUBLIC_KEY = gm9OJe+cAjHpYDiqJG/bIuAPEzLSlC3oF8+z1vrRpfE=
