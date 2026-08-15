@@ -25,6 +25,27 @@ OUTPUT_DIR=""
 APPCAST_OUTPUT="$REPO_ROOT/appcast.xml"
 PUBLISH=0
 ALLOW_DIRTY=0
+PRE_METADATA_HEAD=""
+PUBLISHED_METADATA_HEAD=""
+
+rollback_published_metadata() {
+    [[ -n "$PRE_METADATA_HEAD" && -n "$PUBLISHED_METADATA_HEAD" ]] || return 0
+    git -C "$REPO_ROOT" push \
+        "--force-with-lease=refs/heads/$FEED_BRANCH:$PUBLISHED_METADATA_HEAD" \
+        origin "$PRE_METADATA_HEAD:refs/heads/$FEED_BRANCH"
+    git -C "$REPO_ROOT" reset --hard "$PRE_METADATA_HEAD" >/dev/null
+    PUBLISHED_METADATA_HEAD=""
+}
+
+on_exit() {
+    local status=$?
+    trap - EXIT
+    if [[ "$status" != '0' && -n "$PUBLISHED_METADATA_HEAD" ]]; then
+        rollback_published_metadata || status=1
+    fi
+    exit "$status"
+}
+trap on_exit EXIT
 
 usage() {
     printf '%s\n' \
@@ -240,10 +261,12 @@ if [[ "$PUBLISH" == '1' ]]; then
     "$SIGN_UPDATE" --account "$SPARKLE_ACCOUNT" --verify "$REMOTE_ARCHIVE" "$APPCAST_SIGNATURE"
 
     log 'Publishing signed appcast last'
+    PRE_METADATA_HEAD="$(git -C "$REPO_ROOT" rev-parse HEAD)"
     git -C "$REPO_ROOT" add -- appcast.xml
     [[ -z "$(git -C "$REPO_ROOT" diff --cached --name-only | grep -v '^appcast.xml$' || true)" ]] || fail 'Unexpected staged files before appcast commit'
     git -C "$REPO_ROOT" commit -m "release: publish VoiceInk $SHORT_VERSION build $BUILD_VERSION"
     git -C "$REPO_ROOT" push origin "HEAD:$FEED_BRANCH"
+    PUBLISHED_METADATA_HEAD="$(git -C "$REPO_ROOT" rev-parse HEAD)"
 
     PUBLIC_APPCAST="$OUTPUT_DIR/public-appcast.xml"
     for attempt in 1 2 3 4 5 6; do
@@ -258,6 +281,7 @@ if [[ "$PUBLISH" == '1' ]]; then
     "$SIGN_UPDATE" --account "$SPARKLE_ACCOUNT" --verify "$PUBLIC_APPCAST"
     [[ "$(xmllint --xpath "string(//*[local-name()='item']/*[local-name()='version'])" "$PUBLIC_APPCAST")" == "$BUILD_VERSION" ]] \
         || fail 'Public appcast build version mismatch'
+    PUBLISHED_METADATA_HEAD=""
 fi
 
 printf '\nVoiceInk release prepared successfully.\n'
