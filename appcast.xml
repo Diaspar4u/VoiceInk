@@ -4,22 +4,22 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.11+ads</title>
-            <pubDate>Thu, 13 Aug 2026 14:35:42 -0400</pubDate>
-            <sparkle:version>213</sparkle:version>
-            <sparkle:shortVersionString>2.11+ads</sparkle:shortVersionString>
+            <title>2.11.1-ads.1</title>
+            <pubDate>Tue, 25 Aug 2026 13:59:34 -0400</pubDate>
+            <sparkle:version>214</sparkle:version>
+            <sparkle:shortVersionString>2.11.1-ads.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>14.4</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>VoiceInk 2.11+ads</h2>
+            <description><![CDATA[<h2>VoiceInk 2.11.1-ads.1</h2>
 <ul>
-  <li>Adds automatic updates through the maintained-fork release channel.</li>
-  <li>Preserves local transcription, prompt transport, settings, statistics, and licensing behavior.</li>
+  <li>Prevents persistent menu bar status-item redraw loops.</li>
+  <li>Preserves existing fork behavior.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/voiceink-v2.11-ads-b213/VoiceInk-2.11-ads-b213.zip" length="44030652" type="application/octet-stream" sparkle:edSignature="6zk3a+C5RowXKQArxOJ3B9askY+qOmDxLOO7Ntgrf3jicDifqNLx7KaWbZiIgR6zkaOL/LIoFtkAswd5+EIGCQ=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.11.1-ads.1/VoiceInk-2.11.1-ads.1-b214.zip" length="44030339" type="application/octet-stream" sparkle:edSignature="nO0pNDFvFMv58J1c9Y0IeAf4SPwnyxgD99Vu9ZNMSWEMXFKBNG/QrcKvCMANjmUgDhUPMc9p8pxnC4Ts+h9wCg=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: fYGdNEsQBgjWg7WuZoBUS7E6bXZt3QIXNgj+Q0wpgNHumVppwoEOrtswNa0lqvvjT4Ra4UYwERkxUwFS1MevCA==
-length: 1430
+edSignature: UsuqFcucMMBDAiXBnrlJginwaXrGKDlA3gGcMgc90AR5OmzQUCfoSWQZ2pjj9iy8WadSf+NJJRUAcj/FdU9lCg==
+length: 1362
 -->
