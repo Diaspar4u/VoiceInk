@@ -17,7 +17,7 @@ FEED_BRANCH="${VOICEINK_FEED_BRANCH:-andrey/all-fixes}"
 FEED_URL="https://raw.githubusercontent.com/$REPOSITORY/$FEED_BRANCH/appcast.xml"
 RELEASE_BASE_URL="https://github.com/$REPOSITORY/releases/download"
 EXPECTED_BUNDLE_ID="com.prakashjoshipax.VoiceInk"
-EXPECTED_SHORT_VERSION="2.11+ads"
+EXPECTED_SHORT_VERSION="2.11.1-ads.1"
 EXPECTED_MINIMUM_SYSTEM_VERSION="14.4"
 BUILD_VERSION=""
 NOTES_PATH=""
@@ -57,7 +57,7 @@ usage() {
         '' \
         'Options:' \
         '  --build-number <integer>  Monotonically increasing CFBundleVersion.' \
-        '  --notes <file>            Release notes (default: release-notes/2.11+ads.html).' \
+        '  --notes <file>            Release notes (default: release-notes/2.11.1-ads.1.html).' \
         '  --output-dir <directory>  Artifact directory.' \
         '  --appcast-output <file>   Candidate feed destination (default: ./appcast.xml).' \
         '  --publish                 Publish release asset and feed; requires maintained branch.' \
@@ -155,11 +155,11 @@ SIGN_UPDATE="$SPARKLE_BIN_DIR/sign_update"
 mkdir -p "$OUTPUT_DIR"
 DERIVED_DATA="$OUTPUT_DIR/DerivedData"
 APP_PATH="$OUTPUT_DIR/VoiceInk.app"
-ARCHIVE_NAME="VoiceInk-2.11-ads-b$BUILD_VERSION.zip"
+ARCHIVE_NAME="VoiceInk-2.11.1-ads.1-b$BUILD_VERSION.zip"
 ARCHIVE_PATH="$OUTPUT_DIR/$ARCHIVE_NAME"
 APPCAST_WORK_DIR="$OUTPUT_DIR/appcast-work"
 GENERATED_APPCAST="$APPCAST_WORK_DIR/appcast.xml"
-RELEASE_TAG="voiceink-v2.11-ads-b$BUILD_VERSION"
+RELEASE_TAG="v2.11.1-ads.1"
 DOWNLOAD_URL="$RELEASE_BASE_URL/$RELEASE_TAG/$ARCHIVE_NAME"
 
 log "Building VoiceInk $EXPECTED_SHORT_VERSION ($BUILD_VERSION)"
