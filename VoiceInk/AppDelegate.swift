@@ -4,19 +4,25 @@ import UniformTypeIdentifiers
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     weak var menuBarManager: MenuBarManager?
+    private var didFinishLaunching = false
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         menuBarManager?.applyActivationPolicy()
+        didFinishLaunching = true
+
+        if NSApplication.shared.isActive {
+            WindowManager.shared.showMainWindow()
+        }
+    }
+
+    func applicationDidBecomeActive(_ notification: Notification) {
+        guard didFinishLaunching else { return }
+        guard WindowManager.shared.currentMainWindow() == nil else { return }
+        WindowManager.shared.showMainWindow()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if WindowManager.shared.currentMainWindow() != nil {
-            WindowManager.shared.showMainWindow()
-            return false
-        }
-
-        WindowManager.shared.prepareForUserRequestedMainWindow()
-        NotificationCenter.default.post(name: .showMainWindowRequested, object: nil)
+        WindowManager.shared.showMainWindow()
         return false
     }
 
@@ -39,11 +45,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if WindowManager.shared.currentMainWindow() == nil {
-            // Cold start: do NOT create a window here to avoid extra window/tab.
-            // Defer to SwiftUI's main window scene and let ContentView process this later.
             pendingOpenFileURL = url
-            WindowManager.shared.prepareForUserRequestedMainWindow()
-            NotificationCenter.default.post(name: .showMainWindowRequested, object: nil)
+            WindowManager.shared.showMainWindow()
         } else {
             // Running: focus current window and route in-place to Transcribe Audio
             WindowManager.shared.showMainWindow()

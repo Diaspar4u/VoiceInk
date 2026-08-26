@@ -18,20 +18,9 @@ struct VoiceInkApp: App {
     @StateObject private var recordingShortcutManager: RecordingShortcutManager
     @StateObject private var updaterViewModel: UpdaterViewModel
     @StateObject private var menuBarManager: MenuBarManager
-    @StateObject private var mainWindowNavigation = MainWindowNavigation.shared
     @StateObject private var aiService = AIService()
     @StateObject private var enhancementService: AIEnhancementService
-    @StateObject private var licenseViewModel = LicenseViewModel.shared
     @StateObject private var activeWindowService = ActiveWindowService.shared
-    @AppStorage("hasCompletedOnboardingV2") private var hasCompletedOnboardingV2 = false
-    @AppStorage("enableAnnouncements") private var enableAnnouncements = true
-    @State private var didShowLaunchReminders = false
-
-    // Audio cleanup manager for automatic deletion of old audio files
-    private let audioCleanupManager = AudioCleanupManager.shared
-
-    // Transcription auto-cleanup service for zero data retention
-    private let transcriptionAutoCleanupService = TranscriptionAutoCleanupService.shared
 
     // Model prewarm service for optimizing model on wake from sleep
     @StateObject private var prewarmService: ModelPrewarmService
@@ -162,6 +151,26 @@ struct VoiceInkApp: App {
         _prewarmService = StateObject(wrappedValue: prewarmService)
 
         appDelegate.menuBarManager = menuBarManager
+        let applicationDelegate = appDelegate
+        WindowManager.shared.configure {
+            AnyView(
+                VoiceInkMainContent(
+                    container: resolvedContainer,
+                    engine: engine,
+                    whisperModelManager: whisperModelManager,
+                    fluidAudioModelManager: fluidAudioModelManager,
+                    transcriptionModelManager: transcriptionModelManager,
+                    recorderUIManager: recorderUIManager,
+                    recordingShortcutManager: recordingShortcutManager,
+                    updaterViewModel: updaterViewModel,
+                    menuBarManager: menuBarManager,
+                    mainWindowNavigation: MainWindowNavigation.shared,
+                    aiService: aiService,
+                    enhancementService: enhancementService,
+                    appDelegate: applicationDelegate
+                )
+            )
+        }
 
         // Ensure no lingering recording state from previous runs
         Task {
@@ -278,102 +287,111 @@ struct VoiceInkApp: App {
     }
 
     var body: some Scene {
-        Window("VoiceInk", id: AppWindowID.main) {
-            Group {
-                if hasCompletedOnboardingV2 {
-                    ContentView()
-                        .environmentObject(engine)
-                        .environmentObject(whisperModelManager)
-                        .environmentObject(fluidAudioModelManager)
-                        .environmentObject(transcriptionModelManager)
-                        .environmentObject(recorderUIManager)
-                        .environmentObject(recordingShortcutManager)
-                        .environmentObject(updaterViewModel)
-                        .environmentObject(menuBarManager)
-                        .environmentObject(mainWindowNavigation)
-                        .environmentObject(aiService)
-                        .environmentObject(enhancementService)
-                        .modelContainer(container)
-                        .onAppear {
-                            if enableAnnouncements {
-                                AnnouncementsService.shared.start()
-                            }
-
-                            showLaunchRemindersIfNeeded()
-
-                            GitHubStarPromptCoordinator.shared.scheduleIfNeeded(modelContainer: container)
-
-                            // Run due audio-only cleanup and schedule future checks when transcript cleanup is not managing retention.
-                            if !UserDefaults.standard.bool(forKey: CleanupSettingsKeys.isTranscriptionCleanupEnabled)
-                                && UserDefaults.standard.bool(forKey: CleanupSettingsKeys.isAudioCleanupEnabled)
-                            {
-                                Task {
-                                    await audioCleanupManager.runAutomaticCleanupIfNeeded(
-                                        modelContext: container.mainContext)
-                                }
-                                audioCleanupManager.startAutomaticCleanup(modelContext: container.mainContext)
-                            }
-
-                            // Process any pending open-file request now that the main ContentView is ready.
-                            if let pendingURL = appDelegate.pendingOpenFileURL {
-                                NotificationCenter.default.post(
-                                    name: .navigateToDestination, object: nil,
-                                    userInfo: ["destination": "Transcribe Audio"])
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                    NotificationCenter.default.post(
-                                        name: .openFileForTranscription, object: nil, userInfo: ["url": pendingURL])
-                                }
-                                appDelegate.pendingOpenFileURL = nil
-                            }
-                        }
-                        .background(
-                            WindowAccessor { window in
-                                WindowManager.shared.configureWindow(window)
-                            }
-                        )
-                        .onDisappear {
-                            AnnouncementsService.shared.stop()
-                            whisperModelManager.unloadModel()
-
-                            // Stop the automatic audio cleanup process
-                            audioCleanupManager.stopAutomaticCleanup()
-                        }
-                } else {
-                    OnboardingView(hasCompletedOnboardingV2: $hasCompletedOnboardingV2)
-                        .environmentObject(fluidAudioModelManager)
-                        .environmentObject(transcriptionModelManager)
-                        .environmentObject(aiService)
-                        .environmentObject(enhancementService)
-                        .frame(width: AppWindowLayout.width)
-                        .frame(minHeight: AppWindowLayout.minimumHeight)
-                        .background(
-                            WindowAccessor { window in
-                                WindowManager.shared.configureWindow(window)
-                            })
-                }
-            }
-            .confettiCelebrationPresenter()
-            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-                licenseViewModel.refreshLicenseState()
-            }
-            .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
-                licenseViewModel.refreshLicenseState()
-            }
+        Settings {
+            EmptyView()
         }
-        .windowStyle(.hiddenTitleBar)
-        .defaultSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
-        .windowResizability(.contentSize)
-
-        #if DEBUG
-            WindowGroup("Debug") {
-                Button("Toggle Menu Bar Only") {
-                    menuBarManager.isMenuBarOnly.toggle()
-                }
-            }
-        #endif
     }
 
-    /// Only one notification fits on screen, so show at most one launch reminder.
+}
+
+private struct VoiceInkMainContent: View {
+    let container: ModelContainer
+    let engine: VoiceInkEngine
+    let whisperModelManager: WhisperModelManager
+    let fluidAudioModelManager: FluidAudioModelManager
+    let transcriptionModelManager: TranscriptionModelManager
+    let recorderUIManager: RecorderUIManager
+    let recordingShortcutManager: RecordingShortcutManager
+    let updaterViewModel: UpdaterViewModel
+    let menuBarManager: MenuBarManager
+    let mainWindowNavigation: MainWindowNavigation
+    let aiService: AIService
+    let enhancementService: AIEnhancementService
+    let appDelegate: AppDelegate
+
+    @AppStorage("hasCompletedOnboardingV2") private var hasCompletedOnboardingV2 = false
+    @AppStorage("enableAnnouncements") private var enableAnnouncements = true
+    @State private var didShowLaunchReminders = false
+
+    private let audioCleanupManager = AudioCleanupManager.shared
+    private let licenseViewModel = LicenseViewModel.shared
+
+    var body: some View {
+        Group {
+            if hasCompletedOnboardingV2 {
+                ContentView()
+                    .environmentObject(engine)
+                    .environmentObject(whisperModelManager)
+                    .environmentObject(fluidAudioModelManager)
+                    .environmentObject(transcriptionModelManager)
+                    .environmentObject(recorderUIManager)
+                    .environmentObject(recordingShortcutManager)
+                    .environmentObject(updaterViewModel)
+                    .environmentObject(menuBarManager)
+                    .environmentObject(mainWindowNavigation)
+                    .environmentObject(aiService)
+                    .environmentObject(enhancementService)
+                    .modelContainer(container)
+                    .onAppear {
+                        if enableAnnouncements {
+                            AnnouncementsService.shared.start()
+                        }
+
+                        showLaunchRemindersIfNeeded()
+                        GitHubStarPromptCoordinator.shared.scheduleIfNeeded(modelContainer: container)
+
+                        if !UserDefaults.standard.bool(forKey: CleanupSettingsKeys.isTranscriptionCleanupEnabled)
+                            && UserDefaults.standard.bool(forKey: CleanupSettingsKeys.isAudioCleanupEnabled)
+                        {
+                            Task {
+                                await audioCleanupManager.runAutomaticCleanupIfNeeded(
+                                    modelContext: container.mainContext)
+                            }
+                            audioCleanupManager.startAutomaticCleanup(modelContext: container.mainContext)
+                        }
+
+                        if let pendingURL = appDelegate.pendingOpenFileURL {
+                            NotificationCenter.default.post(
+                                name: .navigateToDestination,
+                                object: nil,
+                                userInfo: ["destination": "Transcribe Audio"]
+                            )
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                NotificationCenter.default.post(
+                                    name: .openFileForTranscription,
+                                    object: nil,
+                                    userInfo: ["url": pendingURL]
+                                )
+                            }
+                            appDelegate.pendingOpenFileURL = nil
+                        }
+                    }
+                    .onDisappear {
+                        AnnouncementsService.shared.stop()
+                        whisperModelManager.unloadModel()
+                        audioCleanupManager.stopAutomaticCleanup()
+                    }
+            } else {
+                OnboardingView(hasCompletedOnboardingV2: $hasCompletedOnboardingV2)
+                    .environmentObject(fluidAudioModelManager)
+                    .environmentObject(transcriptionModelManager)
+                    .environmentObject(aiService)
+                    .environmentObject(enhancementService)
+                    .frame(width: AppWindowLayout.width)
+                    .frame(minHeight: AppWindowLayout.minimumHeight)
+            }
+        }
+        .frame(width: AppWindowLayout.width)
+        .frame(minHeight: AppWindowLayout.minimumHeight)
+        .confettiCelebrationPresenter()
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            licenseViewModel.refreshLicenseState()
+        }
+        .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
+            licenseViewModel.refreshLicenseState()
+        }
+    }
+
     private func showLaunchRemindersIfNeeded() {
         guard !didShowLaunchReminders else { return }
         didShowLaunchReminders = true
@@ -402,61 +420,5 @@ struct VoiceInkApp: App {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
-    }
-}
-
-private struct MainWindowRequestBridge: View {
-    @Environment(\.openWindow) private var openWindow
-    let menuBarManager: MenuBarManager
-
-    var body: some View {
-        Color.clear
-            .frame(width: 0, height: 0)
-            .onReceive(NotificationCenter.default.publisher(for: .showMainWindowRequested)) { _ in
-                let existingWindow = WindowManager.shared.currentMainWindow()
-
-                if existingWindow == nil {
-                    menuBarManager.activateForPresentedWindow()
-                    WindowManager.shared.prepareForUserRequestedMainWindow()
-                    openWindow(id: AppWindowID.main)
-                } else {
-                    menuBarManager.activateForPresentedWindow()
-                    openWindow(id: AppWindowID.main)
-                    WindowManager.shared.showMainWindow()
-                }
-            }
-    }
-}
-
-struct WindowAccessor: NSViewRepresentable {
-    let callback: (NSWindow) -> Void
-
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-
-    func makeNSView(context: Context) -> NSView {
-        let view = NSView()
-        notifyWindowIfNeeded(for: view, context: context)
-        return view
-    }
-
-    func updateNSView(_ nsView: NSView, context: Context) {
-        notifyWindowIfNeeded(for: nsView, context: context)
-    }
-
-    private func notifyWindowIfNeeded(for view: NSView, context: Context) {
-        DispatchQueue.main.async {
-            if let window = view.window,
-                context.coordinator.window !== window
-            {
-                context.coordinator.window = window
-                callback(window)
-            }
-        }
-    }
-
-    final class Coordinator {
-        weak var window: NSWindow?
     }
 }

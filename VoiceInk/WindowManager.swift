@@ -6,10 +6,6 @@ enum AppWindowLayout {
     static let minimumHeight: CGFloat = 750
 }
 
-enum AppWindowID {
-    static let main = "main"
-}
-
 enum WindowDiagnostics {
     static func visibleUserFacingWindows(excluding excludedWindow: NSWindow? = nil) -> [NSWindow] {
         NSApplication.shared.windows.filter { window in
@@ -47,169 +43,92 @@ enum AppPresentationPolicy {
     }
 }
 
-class WindowManager: NSObject {
+final class WindowManager: NSObject {
     static let shared = WindowManager()
 
     private static let mainWindowIdentifier = NSUserInterfaceItemIdentifier("com.prakashjoshipax.voiceink.mainWindow")
     private static let mainWindowAutosaveName = NSWindow.FrameAutosaveName("VoiceInkMainWindowFrame")
 
-    private weak var mainWindow: NSWindow?
-    private var didApplyInitialPlacement = false
-    private var shouldShowNextConfiguredMainWindow = false
+    private var contentProvider: (() -> AnyView)?
+    private var mainWindowController: NSWindowController?
 
     private override init() {
         super.init()
     }
 
-    func prepareForUserRequestedMainWindow() {
-        guard !shouldShowNextConfiguredMainWindow else { return }
-        shouldShowNextConfiguredMainWindow = true
-    }
-
-    func configureWindow(_ window: NSWindow) {
-        if let existingWindow = NSApplication.shared.windows.first(where: {
-            $0.identifier == Self.mainWindowIdentifier && $0 != window
-        }) {
-            window.close()
-            if shouldShowNextConfiguredMainWindow {
-                presentMainWindow(existingWindow)
-                shouldShowNextConfiguredMainWindow = false
-            } else {
-                existingWindow.makeKeyAndOrderFront(nil)
-            }
-            return
-        }
-
-        let requiredStyleMask: NSWindow.StyleMask = [
-            .titled, .closable, .miniaturizable, .resizable, .fullSizeContentView,
-        ]
-        window.styleMask.formUnion(requiredStyleMask)
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-        window.backgroundColor = .clear
-        window.isReleasedWhenClosed = false
-        window.title = "VoiceInk"
-        window.collectionBehavior = [.fullScreenPrimary]
-        window.level = .normal
-        window.isOpaque = false
-        window.isMovableByWindowBackground = false
-        window.minSize = NSSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
-        window.maxSize = NSSize(width: AppWindowLayout.width, height: CGFloat.greatestFiniteMagnitude)
-        window.setFrameAutosaveName(Self.mainWindowAutosaveName)
-        applyInitialPlacementIfNeeded(to: window)
-        registerMainWindowIfNeeded(window)
-
-        if shouldShowNextConfiguredMainWindow {
-            shouldShowNextConfiguredMainWindow = false
-            presentMainWindow(window)
-        } else if UserDefaults.standard.bool(forKey: "IsMenuBarOnly") {
-            window.orderOut(nil)
-        }
-    }
-
-    func registerMainWindow(_ window: NSWindow) {
-        mainWindow = window
-        window.identifier = Self.mainWindowIdentifier
-        window.delegate = self
+    func configure(contentProvider: @escaping () -> AnyView) {
+        self.contentProvider = contentProvider
     }
 
     @discardableResult
     func showMainWindow() -> NSWindow? {
-        guard let window = resolveMainWindow() else {
-            return nil
-        }
+        let controller = mainWindowController ?? makeMainWindowController()
+        guard let window = controller?.window else { return nil }
 
-        if window.isMiniaturized {
-            window.deminiaturize(nil)
-        }
-
-        presentMainWindow(window)
+        AppPresentationPolicy.activateForUserFacingWindow()
+        controller?.showWindow(nil)
+        window.makeKeyAndOrderFront(nil)
+        NSApplication.shared.activate(ignoringOtherApps: true)
         return window
     }
 
     func hideMainWindow() {
-        guard let window = resolveMainWindow() else {
-            return
-        }
-
-        window.orderOut(nil)
+        mainWindowController?.close()
     }
 
     func currentMainWindow() -> NSWindow? {
-        resolveMainWindow()
+        mainWindowController?.window
     }
 
-    private func registerMainWindowIfNeeded(_ window: NSWindow) {
-        if window.identifier == nil || window.identifier != Self.mainWindowIdentifier {
-            registerMainWindow(window)
-        }
-    }
+    private func makeMainWindowController() -> NSWindowController? {
+        guard let contentProvider else { return nil }
 
-    private func applyInitialPlacementIfNeeded(to window: NSWindow) {
-        guard !didApplyInitialPlacement else { return }
-        // Attempt to restore previous frame if one exists; otherwise fall back to a centered placement
-        if window.setFrameUsingName(Self.mainWindowAutosaveName) {
-            enforceMainWindowFrameIfNeeded(on: window, preserveRestoredOrigin: true)
-        } else {
-            enforceMainWindowFrameIfNeeded(on: window, preserveRestoredOrigin: false)
+        let hostingController = NSHostingController(rootView: contentProvider())
+        let window = NSWindow(
+            contentRect: NSRect(
+                x: 0,
+                y: 0,
+                width: AppWindowLayout.width,
+                height: AppWindowLayout.minimumHeight
+            ),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+            backing: .buffered,
+            defer: false
+        )
+        window.identifier = Self.mainWindowIdentifier
+        window.delegate = self
+        window.title = "VoiceInk"
+        window.titlebarAppearsTransparent = true
+        window.titleVisibility = .hidden
+        window.backgroundColor = .clear
+        window.isOpaque = false
+        window.isReleasedWhenClosed = true
+        window.isMovableByWindowBackground = false
+        window.collectionBehavior = [.fullScreenPrimary]
+        window.level = .normal
+        window.minSize = NSSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
+        window.maxSize = NSSize(width: AppWindowLayout.width, height: CGFloat.greatestFiniteMagnitude)
+        window.setFrameAutosaveName(Self.mainWindowAutosaveName)
+        window.contentViewController = hostingController
+
+        if !window.setFrameUsingName(Self.mainWindowAutosaveName) {
             window.center()
         }
-        didApplyInitialPlacement = true
-    }
 
-    private func enforceMainWindowFrameIfNeeded(on window: NSWindow, preserveRestoredOrigin: Bool) {
-        let currentFrame = window.frame
-        guard currentFrame.width != AppWindowLayout.width || currentFrame.height < AppWindowLayout.minimumHeight else {
-            return
-        }
-
-        let height = max(currentFrame.height, AppWindowLayout.minimumHeight)
-        let x = preserveRestoredOrigin ? currentFrame.origin.x : currentFrame.midX - (AppWindowLayout.width / 2)
-        let frame = NSRect(
-            x: x,
-            y: currentFrame.maxY - height,
-            width: AppWindowLayout.width,
-            height: height
-        )
-        window.setFrame(frame, display: true)
-    }
-
-    private func resolveMainWindow() -> NSWindow? {
-        if let window = mainWindow {
-            return window
-        }
-
-        if let window = NSApplication.shared.windows.first(where: { $0.identifier == Self.mainWindowIdentifier }) {
-            mainWindow = window
-            window.delegate = self
-            return window
-        }
-
-        return nil
-    }
-
-    private func presentMainWindow(_ window: NSWindow) {
-        AppPresentationPolicy.activateForUserFacingWindow()
-
-        if window.isMiniaturized {
-            window.deminiaturize(nil)
-        }
-
-        window.makeKeyAndOrderFront(nil)
-        NSApplication.shared.activate(ignoringOtherApps: true)
-        window.makeKeyAndOrderFront(nil)
-        if !window.isKeyWindow {
-            window.orderFrontRegardless()
-        }
+        let controller = NSWindowController(window: window)
+        mainWindowController = controller
+        return controller
     }
 }
 
 extension WindowManager: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
-        guard let window = notification.object as? NSWindow else { return }
-        if window.identifier == Self.mainWindowIdentifier {
-            mainWindow = nil
-            didApplyInitialPlacement = false
+        guard let window = notification.object as? NSWindow,
+            mainWindowController?.window === window
+        else {
+            return
         }
+
+        mainWindowController = nil
     }
 }
