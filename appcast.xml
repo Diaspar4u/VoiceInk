@@ -4,22 +4,21 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.11.1-ads.8</title>
-            <pubDate>Wed, 26 Aug 2026 12:05:41 -0400</pubDate>
-            <sparkle:version>221</sparkle:version>
-            <sparkle:shortVersionString>2.11.1-ads.8</sparkle:shortVersionString>
+            <title>2.11.1-ads.10</title>
+            <pubDate>Wed, 26 Aug 2026 16:38:02 -0400</pubDate>
+            <sparkle:version>223</sparkle:version>
+            <sparkle:shortVersionString>2.11.1-ads.10</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>VoiceInk 2.11.1-ads.8</h2>
+            <description><![CDATA[<h2>VoiceInk 2.11.1-ads.10</h2>
 <ul>
-  <li>Restores the main settings window after the menu-bar CPU fix.</li>
-  <li>Retains the hotkey workflow without the runaway status-item path.</li>
+  <li>Stops the unused local-build license timer from continuously refreshing and consuming a CPU core.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.11.1-ads.8/VoiceInk-2.11.1-ads.8-b221.zip" length="43891755" type="application/octet-stream" sparkle:edSignature="ETX+oJ52GUsL+Bs7PiSZQkPzT3rsd4Kydl+W6MORAn61VU/3P7noJUuj04fjpEw+V4e/FIv7Loav+cLW6yzcCA=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.11.1-ads.10/VoiceInk-2.11.1-ads.10-b223.zip" length="43887768" type="application/octet-stream" sparkle:edSignature="yf5uKpc0136qre/Nh1CfJm5FV6JJZJEQgZ2k1nenr5i12xlnXqeQhF891hyxwGY0nsl1e8SwXgQ2/Zx7OMCbDA=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: Cp2qZkyP02D0bvKaNAGt6q8mjdAhcSaBTCrjfnpIG6khtXtMF5REPTNpFYQu2IfGaNAEHjhs1m9trWmT7v+4BA==
-length: 1401
+edSignature: WvGNXJcptH5mzwhsANB+R6qa/5AEd7f9BC/fmHi8vUg3g+tF/3F0Doj0cN+tkh9XiBxaL2TSfelUe3Mqc0BNBA==
+length: 1365
 -->
