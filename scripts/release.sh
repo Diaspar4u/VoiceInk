@@ -17,8 +17,8 @@ FEED_BRANCH="${VOICEINK_FEED_BRANCH:-andrey/all-fixes}"
 FEED_URL="https://raw.githubusercontent.com/$REPOSITORY/$FEED_BRANCH/appcast.xml"
 RELEASE_BASE_URL="https://github.com/$REPOSITORY/releases/download"
 EXPECTED_BUNDLE_ID="com.prakashjoshipax.VoiceInk"
-EXPECTED_SHORT_VERSION="2.11.1-ads.1"
-EXPECTED_MINIMUM_SYSTEM_VERSION="14.4"
+EXPECTED_SHORT_VERSION="2.11.1-ads.8"
+EXPECTED_MINIMUM_SYSTEM_VERSION="26.0"
 BUILD_VERSION=""
 NOTES_PATH=""
 OUTPUT_DIR=""
@@ -57,7 +57,7 @@ usage() {
         '' \
         'Options:' \
         '  --build-number <integer>  Monotonically increasing CFBundleVersion.' \
-        '  --notes <file>            Release notes (default: release-notes/2.11.1-ads.1.html).' \
+        "  --notes <file>            Release notes (default: release-notes/$EXPECTED_SHORT_VERSION.html)." \
         '  --output-dir <directory>  Artifact directory.' \
         '  --appcast-output <file>   Candidate feed destination (default: ./appcast.xml).' \
         '  --publish                 Publish release asset and feed; requires maintained branch.' \
@@ -127,7 +127,7 @@ elif [[ "$OUTPUT_DIR" != /* ]]; then
 fi
 [[ ! -e "$OUTPUT_DIR" ]] || fail "Output already exists: $OUTPUT_DIR"
 
-for command_name in codesign curl ditto gh git plutil security shasum stat xcodebuild xmllint; do
+for command_name in codesign curl ditto gh-diaspar git plutil security shasum stat xcodebuild xmllint; do
     require_command "$command_name"
 done
 
@@ -139,7 +139,7 @@ if [[ "$PUBLISH" == '1' ]]; then
     git -C "$REPO_ROOT" fetch origin "$FEED_BRANCH"
     git -C "$REPO_ROOT" merge-base --is-ancestor "origin/$FEED_BRANCH" HEAD \
         || fail "Release commit is not a descendant of origin/$FEED_BRANCH"
-    env -u GITHUB_TOKEN -u GH_TOKEN HOME="$HOME" XDG_CONFIG_HOME= gh api user --jq .login >/dev/null
+    [[ "$(gh-diaspar api user --jq .login)" == 'Diaspar4u' ]] || fail 'GitHub release owner is not Diaspar4u'
 fi
 
 IDENTITY_SHA="$(security find-identity -v -p codesigning "$KEYCHAIN" | awk -v identity="$SIGNING_IDENTITY" 'index($0, identity) {print $2; exit}')"
@@ -155,11 +155,11 @@ SIGN_UPDATE="$SPARKLE_BIN_DIR/sign_update"
 mkdir -p "$OUTPUT_DIR"
 DERIVED_DATA="$OUTPUT_DIR/DerivedData"
 APP_PATH="$OUTPUT_DIR/VoiceInk.app"
-ARCHIVE_NAME="VoiceInk-2.11.1-ads.1-b$BUILD_VERSION.zip"
+ARCHIVE_NAME="VoiceInk-$EXPECTED_SHORT_VERSION-b$BUILD_VERSION.zip"
 ARCHIVE_PATH="$OUTPUT_DIR/$ARCHIVE_NAME"
 APPCAST_WORK_DIR="$OUTPUT_DIR/appcast-work"
 GENERATED_APPCAST="$APPCAST_WORK_DIR/appcast.xml"
-RELEASE_TAG="v2.11.1-ads.1"
+RELEASE_TAG="v$EXPECTED_SHORT_VERSION"
 DOWNLOAD_URL="$RELEASE_BASE_URL/$RELEASE_TAG/$ARCHIVE_NAME"
 
 log "Building VoiceInk $EXPECTED_SHORT_VERSION ($BUILD_VERSION)"
@@ -247,7 +247,7 @@ ARCHIVE_SHA256="$(shasum -a 256 "$ARCHIVE_PATH" | awk '{print $1}')"
 if [[ "$PUBLISH" == '1' ]]; then
     log 'Publishing immutable GitHub Release asset'
     HEAD_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD)"
-    env -u GITHUB_TOKEN -u GH_TOKEN HOME="$HOME" XDG_CONFIG_HOME= gh release create "$RELEASE_TAG" \
+    gh-diaspar release create "$RELEASE_TAG" \
         "$ARCHIVE_PATH#$ARCHIVE_NAME" \
         --repo "$REPOSITORY" \
         --target "$HEAD_SHA" \
