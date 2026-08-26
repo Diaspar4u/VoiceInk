@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct MenuBarView: View {
+    @Environment(\.openWindow) private var openWindow
     @EnvironmentObject var engine: VoiceInkEngine
     @EnvironmentObject var recorderUIManager: RecorderUIManager
     @EnvironmentObject var transcriptionModelManager: TranscriptionModelManager
@@ -167,8 +168,16 @@ struct MenuBarView: View {
     }
 
     private func showMainWindow() {
+        let existingWindow = WindowManager.shared.currentMainWindow()
         menuBarManager.activateForPresentedWindow()
-        WindowManager.shared.showMainWindow()
+
+        if existingWindow == nil {
+            WindowManager.shared.prepareForUserRequestedMainWindow()
+            openWindow(id: AppWindowID.main)
+        } else {
+            openWindow(id: AppWindowID.main)
+            WindowManager.shared.showMainWindow()
+        }
     }
 
     private func showMainWindowAndNavigate(to destination: String) {

@@ -20,6 +20,12 @@ enum AudioSetupNavigator {
 private enum MainWindowNavigator {
     static func open(destination: ViewType) {
         MainWindowNavigation.shared.navigate(to: destination)
-        WindowManager.shared.showMainWindow()
+
+        if WindowManager.shared.currentMainWindow() == nil {
+            WindowManager.shared.prepareForUserRequestedMainWindow()
+            NotificationCenter.default.post(name: .showMainWindowRequested, object: nil)
+        } else {
+            WindowManager.shared.showMainWindow()
+        }
     }
 }

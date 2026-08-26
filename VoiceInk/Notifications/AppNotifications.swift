@@ -11,7 +11,7 @@ extension Notification.Name {
     static let aiProviderKeyChanged = Notification.Name("aiProviderKeyChanged")
     static let licenseCelebrationRequested = Notification.Name("licenseCelebrationRequested")
     static let navigateToDestination = Notification.Name("navigateToDestination")
-
+    static let showMainWindowRequested = Notification.Name("showMainWindowRequested")
     static let modeConfigurationApplied = Notification.Name("modeConfigurationApplied")
     static let modeConfigurationsDidChange = Notification.Name("ModeConfigurationsDidChange")
     static let modeShortcutAvailabilityDidChange = Notification.Name("modeShortcutAvailabilityDidChange")
