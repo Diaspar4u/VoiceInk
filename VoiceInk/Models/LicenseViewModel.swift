@@ -500,6 +500,10 @@ final class LicenseViewModel: ObservableObject {
         stateRefreshTask?.cancel()
         stateRefreshTask = nil
 
+        #if LOCAL_BUILD
+            return
+        #endif
+
         guard automaticallyRefreshesTime,
             storedLicenseKey == nil,
             let trialStartDate,
