@@ -25,7 +25,6 @@ struct VoiceInkApp: App {
     @StateObject private var activeWindowService = ActiveWindowService.shared
     @AppStorage("hasCompletedOnboardingV2") private var hasCompletedOnboardingV2 = false
     @AppStorage("enableAnnouncements") private var enableAnnouncements = true
-    @State private var showMenuBarIcon = true
     @State private var didShowLaunchReminders = false
 
     // Audio cleanup manager for automatic deletion of old audio files
@@ -365,40 +364,6 @@ struct VoiceInkApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
         .windowResizability(.contentSize)
-        .commands {
-            CommandGroup(replacing: .newItem) {}
-
-            CommandGroup(after: .appInfo) {
-                CheckForUpdatesView(updaterViewModel: updaterViewModel)
-            }
-        }
-
-        MenuBarExtra(isInserted: $showMenuBarIcon) {
-            MenuBarView()
-                .environmentObject(engine)
-                .environmentObject(whisperModelManager)
-                .environmentObject(fluidAudioModelManager)
-                .environmentObject(transcriptionModelManager)
-                .environmentObject(recorderUIManager)
-                .environmentObject(recordingShortcutManager)
-                .environmentObject(menuBarManager)
-                .environmentObject(mainWindowNavigation)
-                .environmentObject(updaterViewModel)
-                .environmentObject(aiService)
-                .environmentObject(enhancementService)
-        } label: {
-            let image: NSImage = {
-                let ratio = $0.size.height / $0.size.width
-                $0.size.height = 22
-                $0.size.width = 22 / ratio
-                return $0
-            }(NSImage(named: "menuBarIcon")!)
-
-            Image(nsImage: image)
-                .background(MainWindowRequestBridge(menuBarManager: menuBarManager))
-        }
-        .menuBarExtraStyle(.menu)
-
         #if DEBUG
             WindowGroup("Debug") {
                 Button("Toggle Menu Bar Only") {

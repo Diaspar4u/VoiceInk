@@ -1,11 +1,11 @@
 // LocalBuild.xcconfig
-// Build configuration for local builds with an ad-hoc fallback when no Apple Development identity is available.
-// Used by `make local` — does NOT affect Debug or Release configurations.
+// Build configuration for Andrey's local fork.
+// Used by local builds; does not affect upstream builds.
 
-// Defaults to ad-hoc signing; make local overrides this when an Apple Development identity is available.
-CODE_SIGN_IDENTITY = -
+// Stable identity preserves the app's designated requirement and TCC grants.
+CODE_SIGN_IDENTITY = Apple Development: ANDREY SHRAYEV (87R47LZ5EP)
 CODE_SIGN_STYLE = Manual
-DEVELOPMENT_TEAM =
+DEVELOPMENT_TEAM = EVBK3FN863
 PROVISIONING_PROFILE_SPECIFIER =
 
 // Entitlements are set via absolute path in the Makefile command line
@@ -13,3 +13,6 @@ PROVISIONING_PROFILE_SPECIFIER =
 
 // Add LOCAL_BUILD compilation flag so Swift code can use #if LOCAL_BUILD
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) LOCAL_BUILD
+
+MARKETING_VERSION = 2.13-ads.1
+CURRENT_PROJECT_VERSION = 224

@@ -26,6 +26,14 @@ struct OnboardingTrustScreen: View {
             )
         }
     }
+
+    private var trustSubtitle: String {
+        #if LOCAL_BUILD
+            "Review how VoiceInk handles your data."
+        #else
+            "Review how VoiceInk handles your data before choosing a license."
+        #endif
+    }
 }
 
 private struct OnboardingTrustContent: View {

@@ -18,7 +18,11 @@ enum ViewType: String, CaseIterable, Identifiable {
 final class MainWindowNavigation: ObservableObject {
     static let shared = MainWindowNavigation()
 
-    @Published var selectedView: ViewType = .dashboard
+    #if LOCAL_BUILD
+        @Published var selectedView: ViewType = .history
+    #else
+        @Published var selectedView: ViewType = .dashboard
+    #endif
 
     private init() {}
 

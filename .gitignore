@@ -31,6 +31,7 @@ playground.xcworkspace
 
 .build/
 build/
+.fork-build/
 .local-build/
 .local-dependencies/
 
