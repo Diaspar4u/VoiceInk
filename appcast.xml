@@ -4,21 +4,22 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.11.1-ads.10</title>
-            <pubDate>Wed, 26 Aug 2026 16:38:02 -0400</pubDate>
-            <sparkle:version>223</sparkle:version>
-            <sparkle:shortVersionString>2.11.1-ads.10</sparkle:shortVersionString>
+            <title>2.13-ads.1</title>
+            <pubDate>Sun, 06 Sep 2026 13:47:14 -0400</pubDate>
+            <sparkle:version>224</sparkle:version>
+            <sparkle:shortVersionString>2.13-ads.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>VoiceInk 2.11.1-ads.10</h2>
+            <description><![CDATA[<h2>VoiceInk 2.13-ads.1</h2>
 <ul>
-  <li>Stops the unused local-build license timer from continuously refreshing and consuming a CPU core.</li>
+  <li>Updates the maintained fork to VoiceInk 2.13 with improved recorder recovery, audio lifecycle handling, clamshell microphone routing, and transcription options.</li>
+  <li>Preserves the fork’s dockless, menu-bar-free local workflow, History default, license-free UI, stable signing identity, and maintained updater.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.11.1-ads.10/VoiceInk-2.11.1-ads.10-b223.zip" length="43887768" type="application/octet-stream" sparkle:edSignature="yf5uKpc0136qre/Nh1CfJm5FV6JJZJEQgZ2k1nenr5i12xlnXqeQhF891hyxwGY0nsl1e8SwXgQ2/Zx7OMCbDA=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.13-ads.1/VoiceInk-2.13-ads.1-b224.zip" length="45258942" type="application/octet-stream" sparkle:edSignature="D0nHwlfRSRmLllsy7PkCEY8sX8To/hCtfa5k+6czkClp10uPl9SGeIEIn3/uJWXa1EpKSiwu7ddX/6FGnppIDA=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: WvGNXJcptH5mzwhsANB+R6qa/5AEd7f9BC/fmHi8vUg3g+tF/3F0Doj0cN+tkh9XiBxaL2TSfelUe3Mqc0BNBA==
-length: 1365
+edSignature: jLsjBkjY+HpWhzZA6VYzrBgz40HhJO/xLd2o1UQ8RFtUqvldOAtaIdKufSnaDl1lSHr1/x8ZIPIKp24uHqyYBA==
+length: 1570
 -->
