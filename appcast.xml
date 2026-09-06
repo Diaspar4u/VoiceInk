@@ -1,24 +1,24 @@
-<?xml version="1.0" standalone="yes"?>
-<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.13</title>
-            <pubDate>Thu, 27 Aug 2026 22:54:28 +0545</pubDate>
-            <sparkle:version>213</sparkle:version>
-            <sparkle:shortVersionString>2.13</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.4</sparkle:minimumSystemVersion>
-            <description><![CDATA[<h3>What's New in VoiceInk 2.13</h3>
+            <title>2.11.1-ads.10</title>
+            <pubDate>Wed, 26 Aug 2026 16:38:02 -0400</pubDate>
+            <sparkle:version>223</sparkle:version>
+            <sparkle:shortVersionString>2.11.1-ads.10</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description><![CDATA[<h2>VoiceInk 2.11.1-ads.10</h2>
 <ul>
-  <li>✨ Added Gemini 3.5 Transcribe support</li>
-  <li>✨ Added SenseVoice Small support</li>
-  <li>⌨️ Improved cancellation handling</li>
-  <li>🎙️ Fixed the recorder panel issue — by @AlexSarbu</li>
-  <li>🎧 Fixed microphone routing issue in clamshell mode</li>
-  <li>🐛 Minor bug fixes and improvements</li>
+  <li>Stops the unused local-build license timer from continuously refreshing and consuming a CPU core.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Beingpax/VoiceInk/releases/download/v2.13/VoiceInk.dmg" length="50174451" type="application/octet-stream" sparkle:edSignature="EZyhSWJgi1u+VLfXBrlEci/V9T4bolvqsBIO2+1vHICIdb5gnq4IwSkk0FN9wagAm+f3v2UfIBEfQSSDC8OhAA=="/>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.11.1-ads.10/VoiceInk-2.11.1-ads.10-b223.zip" length="43887768" type="application/octet-stream" sparkle:edSignature="yf5uKpc0136qre/Nh1CfJm5FV6JJZJEQgZ2k1nenr5i12xlnXqeQhF891hyxwGY0nsl1e8SwXgQ2/Zx7OMCbDA=="></enclosure>
         </item>
     </channel>
-</rss>
+</rss><!-- sparkle-signatures:
+edSignature: WvGNXJcptH5mzwhsANB+R6qa/5AEd7f9BC/fmHi8vUg3g+tF/3F0Doj0cN+tkh9XiBxaL2TSfelUe3Mqc0BNBA==
+length: 1365
+-->
