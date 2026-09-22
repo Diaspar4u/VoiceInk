@@ -12,9 +12,7 @@ CODE_SIGN_STYLE = Manual
 CODE_SIGN_IDENTITY = Apple Development: ANDREY SHRAYEV (87R47LZ5EP)
 PROVISIONING_PROFILE_SPECIFIER =
 
-// Only the VoiceInk app target consumes this variable. Nested frameworks/XPC services
-// keep their own signing metadata during Xcode Archive + Developer ID export.
-VOICEINK_ENTITLEMENTS = $(SRCROOT)/VoiceInk/VoiceInk.local.entitlements
+CODE_SIGN_ENTITLEMENTS = $(SRCROOT)/VoiceInk/VoiceInk.local.entitlements
 
 VOICEINK_FEED_URL = https:/$()/raw.githubusercontent.com/Diaspar4u/VoiceInk/andrey/all-fixes/appcast.xml
 VOICEINK_SPARKLE_PUBLIC_KEY = gm9OJe+cAjHpYDiqJG/bIuAPEzLSlC3oF8+z1vrRpfE=

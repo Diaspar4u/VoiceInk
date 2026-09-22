@@ -17,6 +17,7 @@ FEED_BRANCH="${VOICEINK_FEED_BRANCH:-andrey/all-fixes}"
 FEED_URL="https://raw.githubusercontent.com/$REPOSITORY/$FEED_BRANCH/appcast.xml"
 RELEASE_BASE_URL="https://github.com/$REPOSITORY/releases/download"
 EXPECTED_BUNDLE_ID="com.prakashjoshipax.VoiceInk"
+EXPECTED_TEAM_ID="EVBK3FN863"
 EXPECTED_SHORT_VERSION="2.20-ads.1"
 EXPECTED_MINIMUM_SYSTEM_VERSION="26.0"
 BUILD_VERSION=""
@@ -128,7 +129,7 @@ elif [[ "$OUTPUT_DIR" != /* ]]; then
 fi
 [[ ! -e "$OUTPUT_DIR" ]] || fail "Output already exists: $OUTPUT_DIR"
 
-for command_name in cmp codesign curl ditto gh git plutil security shasum stat xcodebuild xmllint; do
+for command_name in cmp codesign curl ditto gh git lipo plutil security shasum stat xattr xcodebuild xmllint; do
     require_command "$command_name"
 done
 
@@ -195,6 +196,33 @@ log 'Apple-signing application and nested code'
 codesign --force --deep --options runtime --timestamp=none \
     --entitlements "$ENTITLEMENTS" --sign "$IDENTITY_SHA" "$APP_PATH"
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+SIGNING_INFO="$(codesign -dv --verbose=4 "$APP_PATH" 2>&1)"
+TEAM_ID="$(printf '%s\n' "$SIGNING_INFO" | awk -F= '$1 == "TeamIdentifier" {print $2; exit}')"
+[[ "$TEAM_ID" == "$EXPECTED_TEAM_ID" ]] || fail "Unexpected signing team: $TEAM_ID"
+
+EXECUTABLE="$APP_PATH/Contents/MacOS/VoiceInk"
+[[ -x "$EXECUTABLE" ]] || fail "VoiceInk executable is missing: $EXECUTABLE"
+ARCHITECTURES="$(lipo -archs "$EXECUTABLE")"
+case " $ARCHITECTURES " in
+    *' arm64 '*) ;;
+    *) fail "VoiceInk executable is missing arm64 architecture: $ARCHITECTURES" ;;
+esac
+
+EMBEDDED_ENTITLEMENTS="$OUTPUT_DIR/embedded-entitlements.plist"
+codesign -d --entitlements :- "$APP_PATH" > "$EMBEDDED_ENTITLEMENTS" 2>/dev/null
+[[ "$(plutil -extract 'com.apple.security.app-sandbox' raw "$EMBEDDED_ENTITLEMENTS")" == 'false' ]] \
+    || fail 'Unexpected app sandbox entitlement'
+for entitlement in \
+    com.apple.security.automation.apple-events \
+    com.apple.security.device.audio-input \
+    com.apple.security.network.client \
+    com.apple.security.network.server \
+    com.apple.security.screen-capture \
+    com.apple.security.cs.disable-library-validation; do
+    [[ "$(plutil -extract "$entitlement" raw "$EMBEDDED_ENTITLEMENTS")" == 'true' ]] \
+        || fail "Missing required entitlement: $entitlement"
+done
 
 INFO_PLIST="$APP_PATH/Contents/Info.plist"
 SHORT_VERSION="$(read_plist_value "$INFO_PLIST" CFBundleShortVersionString)"

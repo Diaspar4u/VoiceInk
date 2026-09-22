@@ -378,6 +378,10 @@ struct VoiceInkApp: App {
                 }
             }
             .confettiCelebrationPresenter()
+            .background(MainWindowRequestBridge(menuBarManager: menuBarManager))
+            .onAppear {
+                updaterViewModel.checkForUpdatesIfDue()
+            }
             .onReceive(
                 LifecycleObserver.shared.publisher(
                     for: [.applicationDidBecomeActive, .systemDidWake]
@@ -389,6 +393,13 @@ struct VoiceInkApp: App {
         .windowStyle(.hiddenTitleBar)
         .defaultSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
         .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(replacing: .newItem) {}
+
+            CommandGroup(after: .appInfo) {
+                CheckForUpdatesView(updaterViewModel: updaterViewModel)
+            }
+        }
         #if DEBUG
             WindowGroup("Debug") {
                 Button("Toggle Menu Bar Only") {
