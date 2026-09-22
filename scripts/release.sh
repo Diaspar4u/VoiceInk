@@ -219,15 +219,15 @@ esac
 
 EMBEDDED_ENTITLEMENTS="$OUTPUT_DIR/embedded-entitlements.plist"
 codesign -d --entitlements :- "$APP_PATH" > "$EMBEDDED_ENTITLEMENTS" 2>/dev/null
-[[ "$(plutil -extract 'com.apple.security.app-sandbox' raw "$EMBEDDED_ENTITLEMENTS")" == 'false' ]] \
+[[ "$(plutil -extract 'com\.apple\.security\.app-sandbox' raw "$EMBEDDED_ENTITLEMENTS")" == 'false' ]] \
     || fail 'Unexpected app sandbox entitlement'
 for entitlement in \
-    com.apple.security.automation.apple-events \
-    com.apple.security.device.audio-input \
-    com.apple.security.network.client \
-    com.apple.security.network.server \
-    com.apple.security.screen-capture \
-    com.apple.security.cs.disable-library-validation; do
+    'com\.apple\.security\.automation\.apple-events' \
+    'com\.apple\.security\.device\.audio-input' \
+    'com\.apple\.security\.network\.client' \
+    'com\.apple\.security\.network\.server' \
+    'com\.apple\.security\.screen-capture' \
+    'com\.apple\.security\.cs\.disable-library-validation'; do
     [[ "$(plutil -extract "$entitlement" raw "$EMBEDDED_ENTITLEMENTS")" == 'true' ]] \
         || fail "Missing required entitlement: $entitlement"
 done
