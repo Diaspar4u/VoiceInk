@@ -119,12 +119,12 @@ run:
 		fi; \
 	fi
 
-# Build a signed, notarized DMG and matching local Sparkle Appcast.
+# Build the maintained signed Release archive and Sparkle Appcast.
 release: whisper
 	@if [ -n "$(NOTES)" ]; then \
-		./scripts/release.sh --notes "$(NOTES)" $(RELEASE_ARGS); \
+		./scripts/release.sh --build-number 225 --notes "$(NOTES)" $(RELEASE_ARGS); \
 	else \
-		./scripts/release.sh $(RELEASE_ARGS); \
+		./scripts/release.sh --build-number 225 $(RELEASE_ARGS); \
 	fi
 
 # Store Apple's notarization credentials securely in Keychain.

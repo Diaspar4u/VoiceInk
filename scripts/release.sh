@@ -19,11 +19,12 @@ RELEASE_BASE_URL="https://github.com/$REPOSITORY/releases/download"
 EXPECTED_BUNDLE_ID="com.prakashjoshipax.VoiceInk"
 EXPECTED_TEAM_ID="EVBK3FN863"
 EXPECTED_SHORT_VERSION="2.20-ads.1"
+EXPECTED_BUILD_VERSION="225"
 EXPECTED_MINIMUM_SYSTEM_VERSION="26.0"
 BUILD_VERSION=""
 NOTES_PATH=""
 OUTPUT_DIR=""
-APPCAST_OUTPUT="$REPO_ROOT/appcast.xml"
+APPCAST_OUTPUT=""
 PUBLISH=0
 ALLOW_DIRTY=0
 PRE_METADATA_HEAD=""
@@ -58,10 +59,10 @@ usage() {
         'publishes appcast.xml last, and verifies the public update channel.' \
         '' \
         'Options:' \
-        '  --build-number <integer>  Monotonically increasing CFBundleVersion.' \
+        "  --build-number <integer>  Required build number: $EXPECTED_BUILD_VERSION." \
         "  --notes <file>            Release notes (default: release-notes/$EXPECTED_SHORT_VERSION.html)." \
         '  --output-dir <directory>  Artifact directory.' \
-        '  --appcast-output <file>   Candidate feed destination (default: ./appcast.xml).' \
+        '  --appcast-output <file>   Candidate feed destination (default: release output).' \
         '  --publish                 Publish release asset and feed; requires maintained branch.' \
         '  --allow-dirty             Permit source changes for a prepare-only build.' \
         '  -h, --help                Show this help.'
@@ -110,7 +111,8 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-[[ "$BUILD_VERSION" =~ ^[0-9]+$ ]] || fail '--build-number must be an integer'
+[[ "$BUILD_VERSION" == "$EXPECTED_BUILD_VERSION" ]] \
+    || fail "--build-number must be $EXPECTED_BUILD_VERSION for $EXPECTED_SHORT_VERSION"
 [[ -f "$FORK_RELEASE_CONFIG" ]] || fail "Missing $FORK_RELEASE_CONFIG"
 [[ -f "$ENTITLEMENTS" ]] || fail "Missing $ENTITLEMENTS"
 [[ -f "$KEYCHAIN" ]] || fail "Missing signing Keychain: $KEYCHAIN"
@@ -128,8 +130,13 @@ elif [[ "$OUTPUT_DIR" != /* ]]; then
     OUTPUT_DIR="$REPO_ROOT/$OUTPUT_DIR"
 fi
 [[ ! -e "$OUTPUT_DIR" ]] || fail "Output already exists: $OUTPUT_DIR"
+if [[ -z "$APPCAST_OUTPUT" ]]; then
+    APPCAST_OUTPUT="$OUTPUT_DIR/appcast.xml"
+elif [[ "$APPCAST_OUTPUT" != /* ]]; then
+    APPCAST_OUTPUT="$REPO_ROOT/$APPCAST_OUTPUT"
+fi
 
-for command_name in cmp codesign curl ditto gh git lipo plutil security shasum stat xattr xcodebuild xmllint; do
+for command_name in cmp codesign curl ditto gh git jq lipo plutil security shasum stat xattr xcodebuild xmllint; do
     require_command "$command_name"
 done
 
@@ -193,11 +200,12 @@ ditto "$BUILT_APP" "$APP_PATH"
 xattr -cr "$APP_PATH"
 
 log 'Apple-signing application and nested code'
-codesign --force --deep --options runtime --timestamp=none \
-    --entitlements "$ENTITLEMENTS" --sign "$IDENTITY_SHA" "$APP_PATH"
+codesign --force --deep --sign "$IDENTITY_SHA" --options runtime --timestamp=none \
+    --entitlements "$ENTITLEMENTS" "$APP_PATH"
 codesign --verify --deep --strict --verbose=2 "$APP_PATH"
 
 SIGNING_INFO="$(codesign -dv --verbose=4 "$APP_PATH" 2>&1)"
+[[ "$SIGNING_INFO" == *'(runtime)'* ]] || fail 'Hardened runtime flag is missing from the signed app'
 TEAM_ID="$(printf '%s\n' "$SIGNING_INFO" | awk -F= '$1 == "TeamIdentifier" {print $2; exit}')"
 [[ "$TEAM_ID" == "$EXPECTED_TEAM_ID" ]] || fail "Unexpected signing team: $TEAM_ID"
 
@@ -301,12 +309,24 @@ if [[ "$PUBLISH" == '1' ]]; then
 
     log 'Publishing immutable GitHub Release asset'
     HEAD_SHA="$(git -C "$REPO_ROOT" rev-parse HEAD)"
-    gh release create "$RELEASE_TAG" \
-        "$ARCHIVE_PATH#$ARCHIVE_NAME" \
-        --repo "$REPOSITORY" \
-        --target "$HEAD_SHA" \
-        --title "VoiceInk $SHORT_VERSION ($BUILD_VERSION)" \
-        --notes-file "$NOTES_PATH"
+    RELEASE_STATE="$OUTPUT_DIR/release-state.json"
+    if gh release view "$RELEASE_TAG" --repo "$REPOSITORY" \
+        --json targetCommitish,isDraft,isPrerelease,assets > "$RELEASE_STATE" 2>/dev/null; then
+        jq -e \
+            --arg target "$HEAD_SHA" \
+            --arg name "$ARCHIVE_NAME" \
+            --arg digest "sha256:$ARCHIVE_SHA256" \
+            '.targetCommitish == $target and .isDraft == false and .isPrerelease == false and any(.assets[]; .name == $name and .digest == $digest and .state == "uploaded")' \
+            "$RELEASE_STATE" >/dev/null \
+            || fail 'Existing GitHub release does not match the prepared source and archive'
+    else
+        gh release create "$RELEASE_TAG" \
+            "$ARCHIVE_PATH#$ARCHIVE_NAME" \
+            --repo "$REPOSITORY" \
+            --target "$HEAD_SHA" \
+            --title "VoiceInk $SHORT_VERSION ($BUILD_VERSION)" \
+            --notes-file "$NOTES_PATH"
+    fi
 
     REMOTE_ARCHIVE="$OUTPUT_DIR/public-$ARCHIVE_NAME"
     curl --fail --location --retry 3 --output "$REMOTE_ARCHIVE" "$DOWNLOAD_URL"
@@ -316,6 +336,7 @@ if [[ "$PUBLISH" == '1' ]]; then
 
     log 'Publishing signed appcast last'
     PRE_METADATA_HEAD="$(git -C "$REPO_ROOT" rev-parse HEAD)"
+    ditto "$APPCAST_OUTPUT" "$REPO_ROOT/appcast.xml"
     git -C "$REPO_ROOT" add -- appcast.xml
     [[ -z "$(git -C "$REPO_ROOT" diff --cached --name-only | grep -v '^appcast.xml$' || true)" ]] || fail 'Unexpected staged files before appcast commit'
     git -C "$REPO_ROOT" commit -m "release: publish VoiceInk $SHORT_VERSION build $BUILD_VERSION"
@@ -323,18 +344,24 @@ if [[ "$PUBLISH" == '1' ]]; then
     PUBLISHED_METADATA_HEAD="$(git -C "$REPO_ROOT" rev-parse HEAD)"
 
     PUBLIC_APPCAST="$OUTPUT_DIR/public-appcast.xml"
-    for attempt in 1 2 3 4 5 6; do
-        if curl --fail --location --output "$PUBLIC_APPCAST" "$FEED_URL" \
-            && [[ "$(shasum -a 256 "$PUBLIC_APPCAST" | awk '{print $1}')" == "$(shasum -a 256 "$APPCAST_OUTPUT" | awk '{print $1}')" ]]; then
-            break
-        fi
-        [[ "$attempt" != '6' ]] || fail 'Public appcast did not converge to the published feed'
-        sleep 2
-    done
+    IMMUTABLE_APPCAST_URL="https://raw.githubusercontent.com/$REPOSITORY/$PUBLISHED_METADATA_HEAD/appcast.xml"
+    curl --fail --location --header 'Cache-Control: no-cache' \
+        --output "$PUBLIC_APPCAST" "$IMMUTABLE_APPCAST_URL"
+    cmp -s "$APPCAST_OUTPUT" "$PUBLIC_APPCAST" \
+        || fail 'Published appcast commit does not match the signed candidate'
     xmllint --noout "$PUBLIC_APPCAST"
     "$SIGN_UPDATE" --account "$SPARKLE_ACCOUNT" --verify "$PUBLIC_APPCAST"
     [[ "$(xmllint --xpath "string(//*[local-name()='item']/*[local-name()='version'])" "$PUBLIC_APPCAST")" == "$BUILD_VERSION" ]] \
         || fail 'Public appcast build version mismatch'
+
+    if ! curl --fail --location --output "$PUBLIC_APPCAST" "$FEED_URL" \
+        || ! cmp -s "$APPCAST_OUTPUT" "$PUBLIC_APPCAST"; then
+        sleep 305
+        curl --fail --location --output "$PUBLIC_APPCAST" "$FEED_URL"
+        cmp -s "$APPCAST_OUTPUT" "$PUBLIC_APPCAST" \
+            || fail 'Public updater URL did not converge after its cache lifetime'
+    fi
+    "$SIGN_UPDATE" --account "$SPARKLE_ACCOUNT" --verify "$PUBLIC_APPCAST"
     PUBLISHED_METADATA_HEAD=""
 fi
 
