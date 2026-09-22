@@ -33,7 +33,8 @@ rollback_published_metadata() {
     git -C "$REPO_ROOT" push \
         "--force-with-lease=refs/heads/$FEED_BRANCH:$PUBLISHED_METADATA_HEAD" \
         origin "$PRE_METADATA_HEAD:refs/heads/$FEED_BRANCH"
-    git -C "$REPO_ROOT" reset --hard "$PRE_METADATA_HEAD" >/dev/null
+    git -C "$REPO_ROOT" update-ref HEAD "$PRE_METADATA_HEAD" "$PUBLISHED_METADATA_HEAD"
+    git -C "$REPO_ROOT" restore --source="$PRE_METADATA_HEAD" --staged --worktree -- appcast.xml
     PUBLISHED_METADATA_HEAD=""
 }
 
