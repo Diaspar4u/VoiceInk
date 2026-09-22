@@ -4,22 +4,26 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.13-ads.1</title>
-            <pubDate>Sun, 06 Sep 2026 13:47:14 -0400</pubDate>
-            <sparkle:version>224</sparkle:version>
-            <sparkle:shortVersionString>2.13-ads.1</sparkle:shortVersionString>
+            <title>2.20-ads.1</title>
+            <pubDate>Tue, 22 Sep 2026 12:43:11 -0400</pubDate>
+            <sparkle:version>225</sparkle:version>
+            <sparkle:shortVersionString>2.20-ads.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>VoiceInk 2.13-ads.1</h2>
+            <description><![CDATA[<h2>VoiceInk 2.20-ads.1</h2>
 <ul>
-  <li>Updates the maintained fork to VoiceInk 2.13 with improved recorder recovery, audio lifecycle handling, clamshell microphone routing, and transcription options.</li>
-  <li>Preserves the fork’s dockless, menu-bar-free local workflow, History default, license-free UI, stable signing identity, and maintained updater.</li>
+  <li>Adds Quick History for faster access to recent transcriptions.</li>
+  <li>Adds Dictionary Auto Learn plus dictionary import and export.</li>
+  <li>Adds mouse shortcuts and improved locked-session shortcut handling.</li>
+  <li>Adds dashboard activity insights and French localization.</li>
+  <li>Improves model downloads, recording cleanup, OpenRouter reliability, and transcription provider support.</li>
+  <li>Preserves the maintained dockless, menu-bar-free workflow, History default, license-free local UI, stable signing identity, and private Sparkle updater.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.13-ads.1/VoiceInk-2.13-ads.1-b224.zip" length="45258942" type="application/octet-stream" sparkle:edSignature="D0nHwlfRSRmLllsy7PkCEY8sX8To/hCtfa5k+6czkClp10uPl9SGeIEIn3/uJWXa1EpKSiwu7ddX/6FGnppIDA=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.20-ads.1/VoiceInk-2.20-ads.1-b225.zip" length="46089452" type="application/octet-stream" sparkle:edSignature="Qig+BLD8QYuQelPhY1xGxqHM/5zq37eaIfB+KvUIqYwKJZn8i/2hYtDg1l0ZzEtm+AqtY/zAekCN5LU4v7g8BQ=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: jLsjBkjY+HpWhzZA6VYzrBgz40HhJO/xLd2o1UQ8RFtUqvldOAtaIdKufSnaDl1lSHr1/x8ZIPIKp24uHqyYBA==
-length: 1570
+edSignature: Ep/rd2T98zKwW7d6oqQZLlKzHClYuJ4ugUqaueLhd/lr9wgf82RofQA0oqI4HPYLF/anFe7aojwBzRFPzv9CCQ==
+length: 1816
 -->
