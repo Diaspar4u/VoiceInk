@@ -1,27 +1,25 @@
-<?xml version="1.0" standalone="yes"?>
-<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+<?xml version="1.0" standalone="yes"?><!-- sparkle-sign-warning:
+IMPORTANT: This file was signed by Sparkle. Any modifications to this file requires re-signing this file with generate_appcast or sign_update! The signed signature will be embedded at the end of this file.
+--><rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.20</title>
-            <pubDate>Sat, 19 Sep 2026 17:52:18 +0545</pubDate>
-            <sparkle:version>220</sparkle:version>
-            <sparkle:shortVersionString>2.20</sparkle:shortVersionString>
-            <sparkle:minimumSystemVersion>14.4</sparkle:minimumSystemVersion>
-            <description><![CDATA[<h3>What's New in VoiceInk 2.20</h3>
+            <title>2.13-ads.1</title>
+            <pubDate>Sun, 06 Sep 2026 13:47:14 -0400</pubDate>
+            <sparkle:version>224</sparkle:version>
+            <sparkle:shortVersionString>2.13-ads.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
+            <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
+            <description><![CDATA[<h2>VoiceInk 2.13-ads.1</h2>
 <ul>
-  <li>🧠 Introduced the Dictionary Auto Learn feature</li>
-  <li>📦 Support for importing and exporting dictionaries</li>
-  <li>🕘 Faster access to recent transcriptions with Quick History</li>
-  <li>🖱️ Added support for mouse shortcuts</li>
-  <li>🗣️ Added support for Grok Voice Transcribe 2.0</li>
-  <li>🤖 Added support for Gemini 3.8 Flash and Qwen 3.8 27B enhancement models</li>
-  <li>🌍 Support for French localization</li>
-  <li>⚡ Improved OpenRouter performance and stability</li>
-  <li>🛠️ Minor bug fixes and improvements</li>
+  <li>Updates the maintained fork to VoiceInk 2.13 with improved recorder recovery, audio lifecycle handling, clamshell microphone routing, and transcription options.</li>
+  <li>Preserves the fork’s dockless, menu-bar-free local workflow, History default, license-free UI, stable signing identity, and maintained updater.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Beingpax/VoiceInk/releases/download/v2.20/VoiceInk.dmg" length="50395303" type="application/octet-stream" sparkle:edSignature="4jrUeMTntgAvIkxuJrNy9a53K3+e+UXXMxD+pAv2uxLlG+bmImBIZ3+bRBxG3GcI4SoRHw80bXguDKtMnHnqBg=="/>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.13-ads.1/VoiceInk-2.13-ads.1-b224.zip" length="45258942" type="application/octet-stream" sparkle:edSignature="D0nHwlfRSRmLllsy7PkCEY8sX8To/hCtfa5k+6czkClp10uPl9SGeIEIn3/uJWXa1EpKSiwu7ddX/6FGnppIDA=="></enclosure>
         </item>
     </channel>
-</rss>
+</rss><!-- sparkle-signatures:
+edSignature: jLsjBkjY+HpWhzZA6VYzrBgz40HhJO/xLd2o1UQ8RFtUqvldOAtaIdKufSnaDl1lSHr1/x8ZIPIKp24uHqyYBA==
+length: 1570
+-->

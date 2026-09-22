@@ -23,8 +23,13 @@ enum WindowDiagnostics {
 }
 
 enum AppPresentationPolicy {
+    static func activationPolicy(isDockless: Bool) -> NSApplication.ActivationPolicy {
+        isDockless ? .accessory : .regular
+    }
+
     static func activateForUserFacingWindow() {
-        NSApplication.shared.setActivationPolicy(.regular)
+        let isDockless = UserDefaults.standard.bool(forKey: "IsMenuBarOnly")
+        NSApplication.shared.setActivationPolicy(activationPolicy(isDockless: isDockless))
         NSApplication.shared.activate(ignoringOtherApps: true)
     }
 

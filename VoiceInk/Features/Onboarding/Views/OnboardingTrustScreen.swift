@@ -10,7 +10,7 @@ struct OnboardingTrustScreen: View {
         OnboardingStepScreen(
             systemImage: "lock.shield",
             title: "Privacy Starts Here",
-            subtitle: "Review how VoiceInk handles your data before choosing a license.",
+            subtitle: trustSubtitle,
             contentMaxWidth: max(contentMaxWidth, 720),
             showsHeader: false,
             contentYOffset: 0
@@ -25,6 +25,14 @@ struct OnboardingTrustScreen: View {
                 onPrimary: onContinue
             )
         }
+    }
+
+    private var trustSubtitle: String {
+        #if LOCAL_BUILD
+            "Review how VoiceInk handles your data."
+        #else
+            "Review how VoiceInk handles your data before choosing a license."
+        #endif
     }
 }
 
