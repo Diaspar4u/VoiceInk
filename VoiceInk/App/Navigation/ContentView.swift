@@ -23,6 +23,7 @@ final class MainWindowNavigation: ObservableObject {
     #else
         @Published var selectedView: ViewType = .dashboard
     #endif
+    @Published var dictionarySettingsRequested = false
 
     private init() {}
 
@@ -36,6 +37,11 @@ final class MainWindowNavigation: ObservableObject {
 
     func navigate(to destination: ViewType) {
         selectedView = destination
+    }
+
+    func openDictionarySettings() {
+        dictionarySettingsRequested = true
+        navigate(to: .dictionary)
     }
 }
 
