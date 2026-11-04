@@ -4,25 +4,24 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.21-ads.1</title>
-            <pubDate>Thu, 22 Oct 2026 12:48:35 -0400</pubDate>
-            <sparkle:version>226</sparkle:version>
-            <sparkle:shortVersionString>2.21-ads.1</sparkle:shortVersionString>
+            <title>2.25-ads.1</title>
+            <pubDate>Wed, 04 Nov 2026 10:09:34 -0500</pubDate>
+            <sparkle:version>227</sparkle:version>
+            <sparkle:shortVersionString>2.25-ads.1</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h3>VoiceInk 2.21-ads.1</h3>
+            <description><![CDATA[<h2>VoiceInk 2.25-ads.1</h2>
 <ul>
-  <li>Restore media playback and system mute correctly after rapid recordings and output-device changes.</li>
-  <li>Fix case-only dictionary replacements and merge replacement variants with the same target.</li>
-  <li>Duplicate modes from their context menu without copying automatic triggers.</li>
-  <li>Improve audio playback and consistency between History and Quick History.</li>
-  <li>Configure Finish and Send globally instead of per mode.</li>
+  <li>Improved recording shortcut recovery and recording-start reliability.</li>
+  <li>More reliable paste delivery and clipboard restoration.</li>
+  <li>Recovery from empty recordings after audio-device format changes.</li>
+  <li>Literal dictionary replacements preserve dollar signs and backslashes.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.21-ads.1/VoiceInk-2.21-ads.1-b226.zip" length="46519169" type="application/octet-stream" sparkle:edSignature="TtEH2cvAUH3AtAaIhUOYwYfdpOFS+qWO2+1CP8VL0x7b34gGbcDt41fBw3xEAPdV7KUCXd8VOq+s9qUE9TZPAA=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.25-ads.1/VoiceInk-2.25-ads.1-b227.zip" length="46147210" type="application/octet-stream" sparkle:edSignature="2lUGYFpXW5rE1aNOZziKcKdxqalB9b+tMZ+zx7XQR11BongVA3abQmzFYC8NaojPmv2KrUdvt0XPJT1tKfCMAA=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: vXLFeTsftGRs8KudYx7rzCQ3sWhwAZhq5nz2hEJRvmnWB0FXS8tHabWAQyz1AiEx00ltdhQ+hcpJYsPPxhueDA==
-length: 1692
+edSignature: IG37lFbHa6VER6tiO+Ho8BdESepsbs4RcXCvMKf0zhjtGs2ItXsvLjTU1FO17BaRVqDoXEgR979xwA/Wtq4qBA==
+length: 1548
 -->
