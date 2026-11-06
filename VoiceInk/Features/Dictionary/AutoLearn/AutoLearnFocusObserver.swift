@@ -138,7 +138,9 @@ final class AutoLearnFocusObserver: @unchecked Sendable {
             // run loop starts and would otherwise be lost.
             var isRunning = true
             while isRunning {
-                CFRunLoopRunInMode(.defaultMode, 0.25, true)
+                let result = CFRunLoopRunInMode(.defaultMode, 0.25, true)
+                // No live sources remain; retrying would return immediately forever.
+                guard result != .finished else { break }
                 isRunning = withLock { state.shouldRun && state.generation == generation }
             }
 

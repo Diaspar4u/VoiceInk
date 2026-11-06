@@ -133,6 +133,7 @@ private final class ShortcutMonitorWorker: @unchecked Sendable {
         var isInterrupted = false
         var requiresStandaloneRelease = false
         var recoveredMissedRelease = false
+        var mayHavePendingStandaloneTap = false
         var modifierFlagsAtPress: NSEvent.ModifierFlags = []
     }
 
@@ -455,24 +456,7 @@ private final class ShortcutMonitorWorker: @unchecked Sendable {
 
         let modifierFlags = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
         let isAutoRepeat = event.getIntegerValueField(.keyboardEventAutorepeat) != 0
-        let inputAllowed = observeInputPolicy()
-        let relevantActions = shortcuts.filter { _, state in
-            switch state.shortcut.kind {
-            case .key:
-                return (eventKind == .keyDown || eventKind == .keyUp) && state.shortcut.keyCode == inputCode
-                    && (state.isDown || ShortcutDiagnostics.shouldTraceKey(code: inputCode, flags: modifierFlags))
-            case .mouseButton: return (eventKind == .mouseDown || eventKind == .mouseUp) && state.shortcut.keyCode == inputCode
-            case .modifierOnly:
-                return eventKind == .flagsChanged && (state.shortcut.keyCode == inputCode || state.shortcut.keyCode == UInt16.max)
-            }
-        }.keys.map(\.storageName).sorted().joined(separator: ",")
-        if !relevantActions.isEmpty, !isAutoRepeat {
-            ShortcutDiagnostics.notice("input owner=\(owner) generation=\(generation) event=\(eventKind) code=\(inputCode) flags=0x\(String(modifierFlags.rawValue, radix: 16)) repeat=false timestamp=\(event.timestamp) sourcePID=\(event.getIntegerValueField(.eventSourceUnixProcessID)) actions=\(relevantActions) pressed=\(pressedActionSummary) inputAllowed=\(inputAllowed) capture=\(ShortcutDiagnostics.captureSummary)")
-        }
-        guard inputAllowed else {
-            if !relevantActions.isEmpty {
-                ShortcutDiagnostics.notice("input owner=\(owner) result=ignored reason=session-input-policy actions=\(relevantActions)")
-            }
+        guard observeInputPolicy() else {
             return false
         }
         return handleEvent(
@@ -833,6 +817,10 @@ private final class ShortcutMonitorWorker: @unchecked Sendable {
                 state.isInterrupted = false
                 state.requiresStandaloneRelease = false
                 state.recoveredMissedRelease = false
+                if shouldTrigger {
+                    // A double tap can still be pending after the modifier is released.
+                    state.mayHavePendingStandaloneTap = true
+                }
                 shortcuts[action] = state
                 if shouldTrigger, let pressedAt {
                     dispatchShortcutDown(for: action, eventTime: pressedAt, recoveredMissedRelease: recoveredPress)
@@ -913,7 +901,13 @@ private final class ShortcutMonitorWorker: @unchecked Sendable {
         }
 
         for action in standaloneModifierActions {
-            guard shortcuts[action]?.shortcut.isModifierOnly == true else { continue }
+            guard var state = shortcuts[action],
+                state.shortcut.isModifierOnly,
+                state.mayHavePendingStandaloneTap
+            else { continue }
+            // Only the first intervening key can cancel this completed tap.
+            state.mayHavePendingStandaloneTap = false
+            shortcuts[action] = state
             guard let callback = onStandaloneModifierChord else { continue }
             let validity = dispatchValidity
             let queuedGeneration = generation
