@@ -4,24 +4,23 @@ IMPORTANT: This file was signed by Sparkle. Any modifications to this file requi
     <channel>
         <title>VoiceInk</title>
         <item>
-            <title>2.25-ads.1</title>
-            <pubDate>Wed, 04 Nov 2026 10:09:34 -0500</pubDate>
-            <sparkle:version>227</sparkle:version>
-            <sparkle:shortVersionString>2.25-ads.1</sparkle:shortVersionString>
+            <title>2.25-ads.2</title>
+            <pubDate>Fri, 06 Nov 2026 15:14:56 -0500</pubDate>
+            <sparkle:version>228</sparkle:version>
+            <sparkle:shortVersionString>2.25-ads.2</sparkle:shortVersionString>
             <sparkle:minimumSystemVersion>26.0</sparkle:minimumSystemVersion>
             <sparkle:hardwareRequirements>arm64</sparkle:hardwareRequirements>
-            <description><![CDATA[<h2>VoiceInk 2.25-ads.1</h2>
+            <description><![CDATA[<h2>VoiceInk 2.25-ads.2</h2>
 <ul>
-  <li>Improved recording shortcut recovery and recording-start reliability.</li>
-  <li>More reliable paste delivery and clipboard restoration.</li>
-  <li>Recovery from empty recordings after audio-device format changes.</li>
-  <li>Literal dictionary replacements preserve dollar signs and backslashes.</li>
+  <li>Reduced work inside the global keyboard event handler.</li>
+  <li>Avoided repeated shortcut-cancellation callbacks during ordinary typing while preserving cancellation between modifier taps.</li>
+  <li>Stopped the AutoLearn focus observer from retrying a finished run loop.</li>
 </ul>
 ]]></description>
-            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.25-ads.1/VoiceInk-2.25-ads.1-b227.zip" length="46147210" type="application/octet-stream" sparkle:edSignature="2lUGYFpXW5rE1aNOZziKcKdxqalB9b+tMZ+zx7XQR11BongVA3abQmzFYC8NaojPmv2KrUdvt0XPJT1tKfCMAA=="></enclosure>
+            <enclosure url="https://github.com/Diaspar4u/VoiceInk/releases/download/v2.25-ads.2/VoiceInk-2.25-ads.2-b228.zip" length="46121418" type="application/octet-stream" sparkle:edSignature="igDwKJTNHOcp7Vu1cxFlOrRgUB4FUbxgfh9jLTlXdGisgTyygIPmIeBafTYxh1ex+p7cF31dOHTQNdlnWdlQAw=="></enclosure>
         </item>
     </channel>
 </rss><!-- sparkle-signatures:
-edSignature: IG37lFbHa6VER6tiO+Ho8BdESepsbs4RcXCvMKf0zhjtGs2ItXsvLjTU1FO17BaRVqDoXEgR979xwA/Wtq4qBA==
-length: 1548
+edSignature: WyF2+CeJFSzhRJCSSH0l+xJvrSENw7P6H2kwILkk9e1ZCuusZvPiCpw5ESbi6PepLVDW36Yn2/BCVoBi8EsqAQ==
+length: 1526
 -->
